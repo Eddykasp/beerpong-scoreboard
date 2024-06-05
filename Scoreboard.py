@@ -10,42 +10,32 @@ import grequests
 #        - before every state change, store change using storeState method
 #        - implement unimplemented methods below
 
-## TODO: move these two methods into controller class
-def storeState(undo_stack: "UndoStack",...):
-    # TODO: store current state
-    game_state = new GameState(....)
-    undo_stack.push(game_state)
-
-  def loadState(undo_stack: "UndoStack"):
-    if undo_stack.empty():
-      game_state = undo_stack.pop()
-      # TODO: apply state
-      ....
-
 
 class GameState:
-  # TODO: identify everything that needs to be stored
-  def __init__(self,....):
-    # TODO: store everything
+    # TODO: identify everything that needs to be stored
+    def __init__(self, ...):
+        # TODO: store everything
+        pass
 
 
 class UndoStack:
-  def __init__(self):
-    self.stack = []
+    
+    def __init__(self):
+        self.stack = []
 
-  # should be called every time a button is clicked that will change the game state before the change is applied
-  def push(self, game_state: "GameState") -> None:
-    self.stack.append(game_state)
+    # should be called every time a button is clicked that will change the game state before the change is applied
+    def push(self, game_state: "GameState") -> None:
+        self.stack.append(game_state)
 
-  # called by undo function to obtain
-  def pop(self) -> "GameState":
-    if not self.empty():
-      return self.stack.pop()
-    else:
-      raise ValueError("The undostack is empty")
-  
-  def empty(self) -> bool:
-    return len(self.stack) == 0
+    # called by undo function to obtain
+    def pop(self) -> "GameState":
+        if not self.empty():
+            return self.stack.pop()
+        else:
+            raise ValueError("The undostack is empty")
+    
+    def empty(self) -> bool:
+        return len(self.stack) == 0
 
 
 class Display:
@@ -174,26 +164,36 @@ class Display:
 
 class Controller:
     
+    def storeState(self):
+        # TODO: store current state
+        game_state = GameState(....)
+        self.undo_stack.push(game_state)
+
+    def loadState(self):
+        if self.undo_stack.empty():
+            game_state = self.undo_stack.pop()
+            # TODO: apply state
+            ....
 
     def createButtons(self, frame, side, rows, arr):
-            offset = 0
-            bt_water = Button(frame, command= lambda idTeam=side : self.cuppressed_miss(side))
-            bt_water.place(x=side, y=90 ,height='45', width='45')
-            bt_water.configure(image=self.img_cup_water)
-            bt_water.configure(borderwidth="0")
-            bt_water.configure(background=self.background_color)
-            for hoehe in range(rows):
-                for breite in range(rows-hoehe):
-                    tmp = Button(frame)
-                    tmp.place(x=  abs(190-(breite*45)-offset-side), y=135-(hoehe*45) ,height='45', width='45')
-                    tmp.configure(image=self.img_cup_beer)
-                    tmp.configure(borderwidth="0")
-                    tmp.configure(background=self.background_color)
-                    tmp.configure(command=functools.partial(self.cuppressed_hit, id=len(arr), idTeam=side))#need lambda to suppress instant activation 
-                    arr.append(tmp)
-                    
-                    
-                offset += int(45/2)
+        offset = 0
+        bt_water = Button(frame, command= lambda idTeam=side : self.cuppressed_miss(side))
+        bt_water.place(x=side, y=90 ,height='45', width='45')
+        bt_water.configure(image=self.img_cup_water)
+        bt_water.configure(borderwidth="0")
+        bt_water.configure(background=self.background_color)
+        for hoehe in range(rows):
+            for breite in range(rows-hoehe):
+                tmp = Button(frame)
+                tmp.place(x=  abs(190-(breite*45)-offset-side), y=135-(hoehe*45) ,height='45', width='45')
+                tmp.configure(image=self.img_cup_beer)
+                tmp.configure(borderwidth="0")
+                tmp.configure(background=self.background_color)
+                tmp.configure(command=functools.partial(self.cuppressed_hit, id=len(arr), idTeam=side))#need lambda to suppress instant activation 
+                arr.append(tmp)
+                
+                
+            offset += int(45/2)
 
     def __init__(self,master, obj):
         
@@ -241,7 +241,7 @@ class Controller:
         #self.bt_edit_score = Button(self.master, text="Satz manuell eingeben", command=self.editscore)
         #self.bt_edit_score.place(relx= 0.1, rely= 0.7)
         
-
+        self.undo_stack = UndoStack()
 
         self.ergebnisse = []
         #aktuelle sätze
