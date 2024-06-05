@@ -285,19 +285,19 @@ class Controller:
                     i.place_forget()
                 self.obj.bt_cups_home.clear()    
                 self.bt_cups_home.clear()
-                if self.var_game_home==4: 
+                if self.var_game_home == 4: 
                     self.createButtons(self.frame_cups_home,0,3,self.bt_cups_home)
                     self.obj.createButtons(self.obj.frame_home,0,3,self.obj.bt_cups_home)
-                if self.var_game_home==7: 
+                if self.var_game_home == 7: 
                     self.createButtons(self.frame_cups_home,0,2,self.bt_cups_home)
                     self.obj.createButtons(self.obj.frame_home,0,2,self.obj.bt_cups_home)
 
-                if self.var_game_home==9: 
+                if self.var_game_home == 9: 
                     self.createButtons(self.frame_cups_home,0,1,self.bt_cups_home)
                     self.obj.createButtons(self.obj.frame_home,0,1,self.obj.bt_cups_home)
 
             #rerack in der overtime
-            if self.var_game_home >10 and self.var_game_home%3==0: 
+            if self.var_game_home > 10 and self.var_game_home%3==0: 
                 for i in self.bt_cups_home:
                     i.place_forget()
                 for i in self.obj.bt_cups_home:
@@ -313,9 +313,9 @@ class Controller:
             #really change display
             self.obj.bt_cups_away[id].place_forget()
 
-            self.away_cups_hit +=1
-            self.var_game_away +=1
-            self.away_cups_hit_set +=1
+            self.away_cups_hit += 1
+            self.var_game_away += 1
+            self.away_cups_hit_set += 1
 
             if self.var_game_away==4 or self.var_game_away==7 or self.var_game_away==9:
                 #do rerack
