@@ -20,7 +20,7 @@ jobs:
           pip install -r requirements.txt
       - name: Run PyInstaller
         run: |
-          python PyInstaller --onefile Scoreboard.py
+          pyinstaller --onefile Scoreboard.py
       - uses: actions/upload-artifact@v4
         with:
           name: Beerpong_Scoreboard
