@@ -2,7 +2,8 @@ name: Build Workflow
 
 on:
   push:
-    branches: master
+    tags:
+      - 'v*'
 
 jobs:
   build-windows:
@@ -32,9 +33,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ github.event.head_commit.message }}
-          release_name: ${{ github.event.head_commit.message }}
-          overwrite: true
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
           draft: false
           prerelease: false
       - name: Upload Release Asset
