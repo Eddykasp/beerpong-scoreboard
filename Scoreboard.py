@@ -6,16 +6,37 @@ import functools
 import grequests
 #test
 
-## TODO: - add an undo button and set its action to trigger loadState method
-#        - before every state change, store change using storeState method
-#        - implement unimplemented methods below
-
-
 class GameState:
-    # TODO: identify everything that needs to be stored
-    def __init__(self, ...):
-        # TODO: store everything
-        pass
+    def __init__(self, controller: "Controller"):
+        self.ergebnisse = controller.ergebnisse
+        #aktuelle sätze
+        self.var_satz_home = controller.var_satz_home
+        self.var_satz_away = controller.var_satz_away
+        #akuteller spielstand
+        self.var_game_home = controller.var_game_home
+        self.var_game_away = controller.var_game_away
+        #ewiger hits
+        self.home_cups_hit = controller.home_cups_hit
+        self.home_cups_miss = controller.home_cups_miss
+        self.away_cups_hit = controller.away_cups_hit
+        self.away_cups_miss = controller.away_cups_miss
+        #ewige hits pro satz
+        self.home_cups_hit_set = controller.home_cups_hit_set
+        self.home_cups_miss_set = controller.home_cups_miss_set
+        self.away_cups_hit_set = controller.away_cups_hit_set
+        self.away_cups_miss_set = controller.away_cups_miss_set
+
+        # cup positions
+        self.bt_cups_home = []
+        for cup in controller.bt_cups_home:
+            # print(index, cup)
+            if cup.winfo_viewable() == 1:
+                self.bt_cups_home.append((cup.winfo_x(), cup.winfo_y()))
+
+        self.bt_cups_away = []
+        for cup in controller.bt_cups_away:
+            if cup.winfo_viewable() == 1:
+                self.bt_cups_away.append((cup.winfo_x(), cup.winfo_y()))
 
 
 class UndoStack:
@@ -166,14 +187,63 @@ class Controller:
     
     def storeState(self):
         # TODO: store current state
-        game_state = GameState(....)
+        game_state = GameState(self)
         self.undo_stack.push(game_state)
 
-    def loadState(self):
-        if self.undo_stack.empty():
+    def rollbackState(self):
+        if not self.undo_stack.empty():
             game_state = self.undo_stack.pop()
-            # TODO: apply state
-            ....
+            self.ergebnisse = game_state.ergebnisse
+            #aktuelle sätze
+            self.var_satz_home = game_state.var_satz_home
+            self.var_satz_away = game_state.var_satz_away
+            #akuteller spielstand
+            self.var_game_home = game_state.var_game_home
+            self.var_game_away = game_state.var_game_away
+            #ewiger hits
+            self.home_cups_hit = game_state.home_cups_hit
+            self.home_cups_miss = game_state.home_cups_miss
+            self.away_cups_hit = game_state.away_cups_hit
+            self.away_cups_miss = game_state.away_cups_miss
+            #ewige hits pro satz
+            self.home_cups_hit_set = game_state.home_cups_hit_set
+            self.home_cups_miss_set = game_state.home_cups_miss_set
+            self.away_cups_hit_set = game_state.away_cups_hit_set
+            self.away_cups_miss_set = game_state.away_cups_miss_set
+
+            # cup positions
+            for i in self.bt_cups_home:
+                i.place_forget()
+            for i in self.obj.bt_cups_home:
+                i.place_forget()
+            self.bt_cups_home = []
+            self.obj.bt_cups_home = []
+            for cup_pos in game_state.bt_cups_home:
+              self.createCupAt(cup_pos, self.frame_cups_home, 0, self.bt_cups_home)
+              self.createCupAt(cup_pos, self.obj.frame_home, 0, self.obj.bt_cups_home)
+            
+            for i in self.bt_cups_away:
+                i.place_forget()
+            for i in self.obj.bt_cups_away:
+                i.place_forget()
+            self.bt_cups_away = []
+            self.bt_cups_away = []
+            for cup_pos in game_state.bt_cups_away:
+              self.createCupAt(cup_pos, self.frame_cups_away, 190, self.bt_cups_away)
+              self.createCupAt(cup_pos, self.obj.frame_away, 190, self.obj.bt_cups_away)
+            
+            self.master.update()
+            self.obj.master.update()
+            self.updateDisplay()
+
+    def createCupAt(self, cup_pos, frame, side, arr):
+        tmp = Button(frame)
+        tmp.place(x=cup_pos[0], y=cup_pos[1], height='45', width='45')
+        tmp.configure(image=self.img_cup_beer)
+        tmp.configure(borderwidth="0")
+        tmp.configure(background=self.background_color)
+        tmp.configure(command=functools.partial(self.cuppressed_hit, id=len(arr), idTeam=side))#need lambda to suppress instant activation 
+        arr.append(tmp)
 
     def createButtons(self, frame, side, rows, arr):
         offset = 0
@@ -241,6 +311,10 @@ class Controller:
         #self.bt_edit_score = Button(self.master, text="Satz manuell eingeben", command=self.editscore)
         #self.bt_edit_score.place(relx= 0.1, rely= 0.7)
         
+        self.bt_undo = Button(self.master, text="Rückgängig", command=self.rollbackState)
+        self.bt_undo.place(relx= 0.1, rely= 0.7)
+        self.bt_undo["state"] = DISABLED
+
         self.undo_stack = UndoStack()
 
         self.ergebnisse = []
@@ -267,6 +341,7 @@ class Controller:
         pass
 
     def cuppressed_hit(self, id, idTeam):
+        self.storeState()
         if idTeam==0: # home
             self.bt_cups_home[id].place_forget()
             #really change display
@@ -361,6 +436,7 @@ class Controller:
         self.updateDisplay()
 
     def cuppressed_miss(self, idTeam):
+        self.storeState()
         if idTeam==0:
             self.home_cups_miss +=1
             self.home_cups_miss_set +=1
@@ -371,6 +447,7 @@ class Controller:
         self.updateDisplay()
 
     def overtime(self):
+        self.storeState()
         for i in self.bt_cups_home:
             i.place_forget()
         for i in self.obj.bt_cups_home:
@@ -393,7 +470,7 @@ class Controller:
         self.updateDisplay()   
     
     def newgame(self):
-
+        self.storeState()
         tmp = ""
         self.ergebnisse.append(tmp)
         if self.var_game_home>self.var_game_away:
@@ -450,7 +527,10 @@ class Controller:
 
     def updateDisplay(self):
         
-
+        if self.undo_stack.empty():
+            self.bt_undo["state"] = DISABLED
+        else:
+            self.bt_undo["state"] = NORMAL
         #build to strings
         #home
         percent = ""
