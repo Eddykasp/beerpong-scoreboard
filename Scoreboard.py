@@ -2,6 +2,7 @@ import functools
 from tkinter import *
 import tkinter.ttk as ttk
 from bs4 import BeautifulSoup
+import bs4
 import grequests
 #test
 
@@ -580,17 +581,17 @@ class Einstellungen:
         self.master.title("Bierpong Scoreboard - Einstellungen")        
         self.lb_resolution = Label(self.master, text="Auflösung")
         self.lb_resolution.place(relx=0.015, rely=0.2)
-        self.cb_resolution = ttk.Combobox(self.master, value=aufloesungen, state='readonly')
+        self.cb_resolution = ttk.Combobox(self.master, values=aufloesungen, state='readonly')
         self.cb_resolution.place(relx=0.2, rely=0.2)
 
         self.lb_hometeam = Label(self.master, text="Heimteam")
         self.lb_hometeam.place(relx=0.015, rely=0.3)
-        self.cb_hometeam = ttk.Combobox(self.master, value=self.teams, postcommand = self.updateCB)
+        self.cb_hometeam = ttk.Combobox(self.master, values=self.teams, postcommand = self.updateCB)
         self.cb_hometeam.place(relx=0.2, rely=0.3)
 
         self.lb_awayteam = Label(self.master, text="Auswärtsteam")
         self.lb_awayteam.place(relx=0.015, rely=0.4)
-        self.cb_awayteam = ttk.Combobox(self.master, value=self.teams, postcommand = self.updateCB)
+        self.cb_awayteam = ttk.Combobox(self.master, values=self.teams, postcommand = self.updateCB)
         self.cb_awayteam.place(relx=0.2, rely=0.4)
 
         self.lb_playerhome = Label(self.master, text="Spieler-Heim")
@@ -655,6 +656,7 @@ class Einstellungen:
 
             l_teamurls = []
             l_requests = []
+            assert(isinstance(table, bs4.element.Tag))
             for href in table.find_all('a'):
                 #fill team list
                 self.teams.append(href.getText())
@@ -666,11 +668,12 @@ class Einstellungen:
             for resp in responses:
                 players = []
                 soup = BeautifulSoup(resp.text, 'lxml')
-                tmp_table =  soup.find('table',{'class':'sp-player-list'})
+                tmp_table = soup.find('table',{'class':'sp-player-list'})
+                assert(isinstance(tmp_table, bs4.element.Tag))
                 for player in tmp_table.find_all('a'):
                     #clean female players from ♀
                     tmp_player = player.getText()
-                    new_player = tmp_player.replace('♀',"")    
+                    new_player = tmp_player.replace('♀',"")
                     players.append(new_player)
                 #print (players)
                 self.teams_player.append(players.copy())
