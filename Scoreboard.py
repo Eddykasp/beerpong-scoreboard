@@ -187,22 +187,40 @@ class Controller:
         if not self.undo_stack.empty():
             game_state = self.undo_stack.pop()
             self.ergebnisse = game_state.ergebnisse
+
             #aktuelle sätze
             self.var_satz_home = game_state.var_satz_home
             self.var_satz_away = game_state.var_satz_away
+
             #akuteller spielstand
             self.var_game_home = game_state.var_game_home
             self.var_game_away = game_state.var_game_away
+
             #ewiger hits
             self.home_cups_hit = game_state.home_cups_hit
             self.home_cups_miss = game_state.home_cups_miss
             self.away_cups_hit = game_state.away_cups_hit
             self.away_cups_miss = game_state.away_cups_miss
+
             #ewige hits pro satz
             self.home_cups_hit_set = game_state.home_cups_hit_set
             self.home_cups_miss_set = game_state.home_cups_miss_set
             self.away_cups_hit_set = game_state.away_cups_hit_set
             self.away_cups_miss_set = game_state.away_cups_miss_set
+
+            # reset satz
+            tmp = ""
+            tmp = str(self.var_satz_home)+ ":" + str(self.var_satz_away)
+            self.var_satz.set(tmp)
+            self.obj.var_satz.set(tmp)
+
+            # replace or remove new game and OT buttons
+            if self.var_game_home >=10 or self.var_game_away>=10:
+                self.bt_overtime.place(relx=0.5, rely = 0.7, anchor=CENTER)
+                self.bt_newgame.place(relx=0.5, rely = 0.9, anchor=CENTER)
+            else:
+                self.bt_overtime.place_forget()
+                self.bt_newgame.place_forget()
 
             # cup positions
             for i in self.bt_cups_home:
@@ -477,19 +495,19 @@ class Controller:
         self.home_cups_hit_set = 0
         self.home_cups_miss_set = 0
         self.away_cups_hit_set = 0
-        self.away_cups_miss_set = 0 
+        self.away_cups_miss_set = 0
 
         for i in self.bt_cups_home:
             i.place_forget()
         for i in self.obj.bt_cups_home:
             i.place_forget()
-        self.obj.bt_cups_home.clear()    
+        self.obj.bt_cups_home.clear()
         self.bt_cups_home.clear()
         for i in self.bt_cups_away:
             i.place_forget()
         for i in self.obj.bt_cups_away:
             i.place_forget()
-        self.obj.bt_cups_away.clear()    
+        self.obj.bt_cups_away.clear()
         self.bt_cups_away.clear()
 
         self.createButtons(self.frame_cups_home,0,4,self.bt_cups_home)
